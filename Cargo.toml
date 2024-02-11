@@ -1,0 +1,14 @@
+[package]
+name = "can-tcp-bridge-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+can-socketcan-platform-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-socketcan-platform-rs.git" }
+can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
+can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
+crossbeam = "0.8.4"
+log = "0.4.20"
+clap = {version= "4.0.0", features = ["derive"]}
