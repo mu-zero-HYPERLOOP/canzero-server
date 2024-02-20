@@ -9,6 +9,7 @@ edition = "2021"
 can-socketcan-platform-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-socketcan-platform-rs.git" }
 can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
 can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
+can-live-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-live-config-rs.git" }
 crossbeam = "0.8.4"
 log = "0.4.20"
 clap = {version= "4.0.0", features = ["derive"]}

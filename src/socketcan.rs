@@ -13,6 +13,7 @@ pub struct SocketCan {
 
 impl SocketCan {
     pub fn create(interface: &str) -> Result<Self> {
+        println!("Connecting to SocketCAN: {interface}");
         let socket = match CanSocket::open(interface) {
             Ok(owned_socket) => owned_socket,
             Err(err) => {

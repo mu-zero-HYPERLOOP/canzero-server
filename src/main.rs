@@ -4,8 +4,8 @@ use socketcan::SocketCan;
 mod bus_frame;
 mod errors;
 mod socketcan;
-mod socketcan_sender;
 mod socketcan_receiver;
+mod socketcan_sender;
 
 mod tcp_stream;
 
@@ -48,14 +48,20 @@ struct ClientArgs {
 
 fn main() {
     let command = CLI::parse();
+    let live_config =
+        can_live_config_rs::fetch_live_config().expect("Failed to fetch live config!");
+    let socketcan_interfaces = live_config.buses().iter().map(|bus_ref| {
+        SocketCan::create(bus_ref.name()).expect(&format!(
+            "Failed to connect to SocketCAN: {}",
+            bus_ref.name()
+        ))
+    }).collect();
 
     match command {
         CLI::Server(args) => {
-            let socketcan_interfaces = vec![SocketCan::create("can0").expect("failed")];
             server::run_server(&args.address, socketcan_interfaces).unwrap();
         }
         CLI::Client(args) => {
-            let socketcan_interfaces = vec![SocketCan::create("can1").expect("failed")];
             client::run_client(&args.address, socketcan_interfaces).unwrap();
         }
     }
