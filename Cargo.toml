@@ -13,3 +13,6 @@ can-live-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-live-conf
 crossbeam = "0.8.4"
 log = "0.4.20"
 clap = {version= "4.0.0", features = ["derive"]}
+tokio = { version = "1.36.0", features = ["full"] }
+tokio-socketcan = "0.3.1"
+futures = "0.3.30"
