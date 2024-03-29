@@ -16,12 +16,13 @@ pub async fn start_udp_discover(service_name: &str, broadcast_port: u16) -> std:
 
     let mut hello_msg = vec![0u8];
     hello_msg.extend_from_slice(service_name.as_bytes());
+    println!("\u{1b}[34mUDP-Discover: Sending hello packet\u{1b}[0m");
     socket.send_to(&hello_msg, broadcast_addr).await?;
 
     let mut rx_buffer = [0u8; 1024];
     let mut connections = vec![];
     loop {
-        match tokio::time::timeout(Duration::from_millis(100), socket.recv_from(&mut rx_buffer))
+        match tokio::time::timeout(Duration::from_millis(1000), socket.recv_from(&mut rx_buffer))
             .await
         {
             Ok(Ok((packet_size, server_addr))) => {
@@ -31,8 +32,13 @@ pub async fn start_udp_discover(service_name: &str, broadcast_port: u16) -> std:
                 if ty == 1u8 && server_service_name == service_name {
                     connections.push((server_addr.ip(), server_port));
                 }
+                println!("\u{1b}[34mUDP-Discover: Discover server at {server_addr}\u{1b}[0m");
+                break;
             },
-            Err(_) => break,
+            Err(_) => {
+                println!("\u{1b}[34mUDP-Discover: Response timed out\u{1b}[0m");
+                break;
+            }
             _ => continue,
         }
     }

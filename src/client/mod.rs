@@ -1,48 +1,58 @@
-use std::{net::SocketAddr, time::Duration};
+use std::{
+    net::SocketAddr,
+    sync::{atomic::AtomicBool, Arc},
+    time::Duration,
+};
 
 use can_config_rs::config;
 
-use crate::{
-    frame::NetworkFrame,
-    socketcan::{self, SocketCan},
-};
+use crate::{socketcan::SocketCan, tcpcan::TcpCan};
 
 use self::udp_discover::start_udp_discover;
 
 pub mod udp_discover;
 
 pub async fn start_client(config: &config::NetworkRef) {
-    let (tx, rx) = tokio::sync::mpsc::channel::<NetworkFrame>(16);
+    loop {
+        start_client_once(config).await;
+    }
+}
 
-    let config = config.clone();
-
-    let mut server_addr: SocketAddr;
+pub async fn start_client_once(config: &config::NetworkRef) {
+    let server_addr: SocketAddr;
+    println!("\u{1b}[33mSearching for server\u{1b}[33m");
     loop {
         let connections = start_udp_discover("CANzero", 9002).await.unwrap();
         if !connections.is_empty() {
             server_addr = SocketAddr::new(connections[0].0, connections[0].1);
             break;
         }
-        tokio::time::sleep(Duration::from_secs(3)).await;
     }
 
-    let mut tcp_stream = tokio::net::TcpStream::connect(server_addr).await.unwrap();
-    let (read_stream, write_stream) = tcp_stream.split();
+    let tcp_stream = tokio::net::TcpStream::connect(server_addr).await.unwrap();
+    let tcpcan = Arc::new(TcpCan::new(tcp_stream));
 
-    let socketcan = SocketCan::create(&config.buses()).unwrap();
-    tokio::spawn(async move {
+    println!("\u{1b}[32mSuccessful connection to {server_addr}\u{1b}[0m");
+
+    let socketcan = Arc::new(SocketCan::create(&config.buses()).unwrap());
+
+    let tcp_rx = tcpcan.clone();
+    let socketcan_tx = socketcan.clone();
+    let handle = tokio::spawn(async move {
         loop {
             let Some(frame) = socketcan.recv().await else {
                 break;
             };
-            // write_stream -> write
+            tcpcan.send(&frame).await;
         }
     });
 
     loop {
-        // receive from read_stream
-
-
-        // socketcan.send(frame);
+        let Some(frame) = tcp_rx.recv().await else {
+            break;
+        };
+        socketcan_tx.send(&frame).await;
     }
+    handle.abort();
+    println!("\u{1b}[31mConnection closed\u{1b}[0m");
 }

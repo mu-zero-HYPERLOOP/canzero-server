@@ -1,12 +1,14 @@
+use std::time::Instant;
+
 use can_config_rs::config;
 use can_socketcan_platform_rs::CanSocket;
 use tokio::sync::mpsc;
 
-use crate::frame::NetworkFrame;
+use crate::frame::{NetworkFrame, TNetworkFrame};
 
 pub struct SocketCan {
     sockets: Vec<(CanSocket, String)>,
-    rx: tokio::sync::Mutex<mpsc::Receiver<NetworkFrame>>,
+    rx: tokio::sync::Mutex<mpsc::Receiver<TNetworkFrame>>,
 }
 
 impl SocketCan {
@@ -20,6 +22,8 @@ impl SocketCan {
         let (tx, rx) = mpsc::channel(16);
 
         let rx_sockets = sockets.clone();
+
+        let start_of_run = Instant::now();
 
         for (bus_id, (socket, ifname)) in rx_sockets.into_iter().enumerate() {
             let tx = tx.clone();
@@ -36,8 +40,12 @@ impl SocketCan {
                                 },
                                 Err(_) => todo!(),
                             };
+                            let tframe = TNetworkFrame{
+                                network_frame : frame,
+                                timestamp_us : Instant::now().duration_since(start_of_run).as_micros(),
+                            };
 
-                            if let Err(_) = tx.send(frame).await {
+                            if let Err(_) = tx.send(tframe).await {
                                 eprintln!("Failed to send on SocketCan interface {ifname:?}");
                             }
                         });
@@ -53,18 +61,24 @@ impl SocketCan {
             rx: tokio::sync::Mutex::new(rx),
         })
     }
-    pub async fn send(&self, frame: &NetworkFrame) {
-        if let Err(_) = self.sockets[frame.bus_id as usize]
+    pub async fn send(&self, frame: &TNetworkFrame) {
+        if let Err(_) = self.sockets[frame.network_frame.bus_id as usize]
             .0
-            .transmit(&frame.can_frame)
+            .transmit(&frame.network_frame.can_frame)
         {
             eprintln!(
                 "Failed to transmit frame on socketcan interface {:?}",
-                self.sockets[frame.bus_id as usize].1,
+                self.sockets[frame.network_frame.bus_id as usize].1,
             );
         };
     }
-    pub async fn recv(&self) -> Option<NetworkFrame> {
+    pub async fn recv(&self) -> Option<TNetworkFrame> {
         self.rx.lock().await.recv().await
+    }
+}
+
+impl std::fmt::Debug for SocketCan {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "SocketCAN")
     }
 }

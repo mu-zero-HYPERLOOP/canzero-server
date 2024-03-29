@@ -1,4 +1,4 @@
-use std::sync::{Arc, atomic::AtomicU32};
+use std::{any::Any, sync::{atomic::AtomicU32, Arc}};
 
 use tokio::sync::RwLock;
 
@@ -43,6 +43,10 @@ impl Network {
                 return;
             };
             nodes_lock.remove(node_pos);
+            match node.as_ref() {
+                NetworkNode::SocketCanNode(_) => println!("\u{1b}[31mShutdown socketcan connection\u{1b}[0m"),
+                NetworkNode::TcpCanNode(tcp) => println!("\u{1b}[31mShutdown {}\u{1b}[0m", tcp.addr().await),
+            };
         });
     }
 

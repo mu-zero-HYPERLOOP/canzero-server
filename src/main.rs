@@ -2,6 +2,8 @@ use clap::Parser;
 use client::udp_discover::start_udp_discover;
 use server::{udp_reflector::start_udp_reflector, start_server};
 
+use crate::client::start_client;
+
 mod client;
 mod server;
 mod frame;
@@ -40,14 +42,10 @@ async fn main() {
 
     match command {
         CLI::Server(_) => {
-            println!("server");
             start_server(&live_config).await;
         },
         CLI::Client(_) => {
-            let x = start_udp_discover("CANzero", 9002).await.unwrap();
-
-            println!("connections : {x:?}");
+            start_client(&live_config).await;
         }
     }
-    println!("shutdown");
 }
