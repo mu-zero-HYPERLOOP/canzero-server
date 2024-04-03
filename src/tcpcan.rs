@@ -1,4 +1,4 @@
-use std::{mem::size_of, net::SocketAddr};
+use std::{net::SocketAddr, ops::DerefMut};
 
 use futures::lock::Mutex;
 use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::tcp::{OwnedReadHalf, OwnedWriteHalf}};
@@ -8,27 +8,30 @@ use crate::frame::TNetworkFrame;
 #[derive(Debug)]
 pub struct TcpCan {
     tx_stream : Mutex<OwnedWriteHalf>,
-    rx_stream : Mutex<OwnedReadHalf>,
+    rx_stream : Mutex<(Vec<u8>,OwnedReadHalf)>,
 }
 
 impl TcpCan {
     pub fn new(tcp_stream: tokio::net::TcpStream) -> Self {
+        let frame_size = bincode::serialized_size(&TNetworkFrame{
+            network_frame : crate::frame::NetworkFrame {
+                bus_id : 0,
+                can_frame : can_socketcan_platform_rs::frame::CanFrame::new(0, false, false, 0, 0)
+            },
+            timestamp_us : 0,
+        }).unwrap();
+
         let (rx, tx) = tcp_stream.into_split();
         Self {
             tx_stream : Mutex::new(tx),
-            rx_stream : Mutex::new(rx),
+            rx_stream : Mutex::new((vec![0;frame_size as usize], rx)),
         }
     }
 
     pub async fn send(&self, frame: &TNetworkFrame) {
-        println!("TcpCan sending {frame:?}");
-        let byte_slice: &[u8] = unsafe {
-            ::core::slice::from_raw_parts(
-                (frame as *const TNetworkFrame) as *const u8,
-                size_of::<TNetworkFrame>(),
-            )
-        };
-        match self.tx_stream.lock().await.write_all(byte_slice).await {
+        let bytes = bincode::serialize(frame).unwrap();
+        println!("tcpframe size = {}", bytes.len());
+        match self.tx_stream.lock().await.write_all(&bytes).await {
             Ok(_) => (),
             Err(err) => {
                 eprintln!("Failed to send on tcp stream, failed with {err:?}");
@@ -38,13 +41,12 @@ impl TcpCan {
     }
 
     pub async fn recv(&self) -> Option<TNetworkFrame> {
-        let mut buffer: [u8; size_of::<TNetworkFrame>()] = [0; size_of::<TNetworkFrame>()];
-        let x = match self.rx_stream.lock().await.read_exact(&mut buffer).await {
-            Ok(_) => Some(unsafe { std::ptr::read(buffer.as_ptr() as *const _) }),
+        let mut rx_lock = self.rx_stream.lock().await;
+        let (rx_buffer,rx_stream) = rx_lock.deref_mut();
+        match rx_stream.read_exact(rx_buffer).await {
+            Ok(_) => Some(bincode::deserialize::<TNetworkFrame>(rx_buffer).unwrap()),
             Err(_) => None,
-        };
-        println!("TcpCan recv {x:?}");
-        x
+        }
     }
     pub async fn addr(&self) -> SocketAddr {
         self.tx_stream.lock().await.peer_addr().unwrap()
