@@ -21,6 +21,7 @@ impl TcpCan {
     }
 
     pub async fn send(&self, frame: &TNetworkFrame) {
+        println!("TcpCan sending {frame:?}");
         let byte_slice: &[u8] = unsafe {
             ::core::slice::from_raw_parts(
                 (frame as *const TNetworkFrame) as *const u8,
@@ -38,10 +39,12 @@ impl TcpCan {
 
     pub async fn recv(&self) -> Option<TNetworkFrame> {
         let mut buffer: [u8; size_of::<TNetworkFrame>()] = [0; size_of::<TNetworkFrame>()];
-        match self.rx_stream.lock().await.read_exact(&mut buffer).await {
+        let x = match self.rx_stream.lock().await.read_exact(&mut buffer).await {
             Ok(_) => Some(unsafe { std::ptr::read(buffer.as_ptr() as *const _) }),
             Err(_) => None,
-        }
+        };
+        println!("TcpCan recv {x:?}");
+        x
     }
     pub async fn addr(&self) -> SocketAddr {
         self.tx_stream.lock().await.peer_addr().unwrap()

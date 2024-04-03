@@ -2,7 +2,7 @@
 use clap::Parser;
 use server::start_server;
 
-use crate::client::start_client;
+use crate::{client::start_client, frame::TNetworkFrame};
 
 pub mod client;
 pub mod server;
@@ -31,6 +31,7 @@ struct ClientArgs {
 
 #[tokio::main]
 async fn main() {
+    println!("TNetworkFrame size {}", std::mem::size_of::<TNetworkFrame>());
     let command = CLI::parse();
 
     let join_handle = tokio::task::spawn_blocking(|| {
