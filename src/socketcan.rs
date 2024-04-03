@@ -62,6 +62,7 @@ impl SocketCan {
         })
     }
     pub async fn send(&self, frame: &TNetworkFrame) {
+        println!("bus_id {}", frame.network_frame.bus_id as usize);
         if let Err(_) = self.sockets[frame.network_frame.bus_id as usize]
             .0
             .transmit(&frame.network_frame.can_frame)

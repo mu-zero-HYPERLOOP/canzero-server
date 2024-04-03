@@ -4,7 +4,13 @@ use std::{
     time::Duration,
 };
 
-use can_config_rs::config;
+use can_config_rs::{
+    builder::bus::BusData,
+    config::{
+        self,
+        bus::{Bus, BusRef},
+    },
+};
 
 use crate::{socketcan::SocketCan, tcpcan::TcpCan};
 
@@ -34,7 +40,19 @@ pub async fn start_client_once(config: &config::NetworkRef) {
 
     println!("\u{1b}[32mSuccessful connection to {server_addr}\u{1b}[0m");
 
-    let socketcan = Arc::new(SocketCan::create(&config.buses()).unwrap());
+    let buses : Vec<BusRef> = config
+        .buses()
+        .iter()
+        .map(|bus| {
+            BusRef::new(Bus::new(
+                &format!("v{}", bus.name()),
+                bus.id(),
+                bus.baudrate(),
+            ))
+        })
+        .collect();
+
+    let socketcan = Arc::new(SocketCan::create(&buses).unwrap());
 
     let tcp_rx = tcpcan.clone();
     let socketcan_tx = socketcan.clone();
