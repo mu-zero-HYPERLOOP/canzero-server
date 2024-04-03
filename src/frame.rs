@@ -8,6 +8,7 @@ pub struct NetworkFrame {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct TNetworkFrame {
     pub network_frame : NetworkFrame,
     pub timestamp_us : u128,
