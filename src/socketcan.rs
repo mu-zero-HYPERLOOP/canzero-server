@@ -62,7 +62,6 @@ impl SocketCan {
         })
     }
     pub async fn send(&self, frame: &TNetworkFrame) {
-        println!("SocketCAN sending {frame:?}");
         if let Err(_) = self.sockets[frame.network_frame.bus_id as usize]
             .0
             .transmit(&frame.network_frame.can_frame)
@@ -74,9 +73,7 @@ impl SocketCan {
         };
     }
     pub async fn recv(&self) -> Option<TNetworkFrame> {
-        let frame = self.rx.lock().await.recv().await;
-        println!("SocketCAN recv {frame:?}");
-        frame
+        self.rx.lock().await.recv().await
     }
 }
 

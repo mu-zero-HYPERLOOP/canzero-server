@@ -30,7 +30,6 @@ impl TcpCan {
 
     pub async fn send(&self, frame: &TNetworkFrame) {
         let bytes = bincode::serialize(frame).unwrap();
-        println!("tcpframe size = {}", bytes.len());
         match self.tx_stream.lock().await.write_all(&bytes).await {
             Ok(_) => (),
             Err(err) => {

@@ -31,7 +31,6 @@ struct ClientArgs {
 
 #[tokio::main]
 async fn main() {
-    println!("TNetworkFrame size {}", std::mem::size_of::<TNetworkFrame>());
     let command = CLI::parse();
 
     let join_handle = tokio::task::spawn_blocking(|| {
