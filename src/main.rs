@@ -1,14 +1,14 @@
+
 use clap::Parser;
-use client::udp_discover::start_udp_discover;
-use server::{udp_reflector::start_udp_reflector, start_server};
+use server::start_server;
 
 use crate::client::start_client;
 
-mod client;
-mod server;
-mod frame;
-mod socketcan;
-mod tcpcan;
+pub mod client;
+pub mod server;
+pub mod frame;
+pub mod socketcan;
+pub mod tcpcan;
 
 
 #[derive(Parser, Debug)] // requires `derive` feature
@@ -37,8 +37,6 @@ async fn main() {
         can_live_config_rs::fetch_live_config().expect("Failed to fetch live config!")
     });
     let live_config = join_handle.await.unwrap();
-
-
 
     match command {
         CLI::Server(_) => {

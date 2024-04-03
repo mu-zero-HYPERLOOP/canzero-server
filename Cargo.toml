@@ -5,6 +5,14 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "can-tcp-bridge-rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "canzero-tcp-bridge"
+path = "src/main.rs"
+
 [dependencies]
 can-socketcan-platform-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-socketcan-platform-rs.git" }
 can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
