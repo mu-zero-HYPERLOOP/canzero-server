@@ -12,7 +12,6 @@ pub struct SocketCan {
 }
 
 impl SocketCan {
-
     pub fn create(buses: &Vec<config::bus::BusRef>) -> std::io::Result<Self> {
         let sockets: Vec<(CanSocket, String)> = buses
             .iter()
@@ -58,16 +57,10 @@ impl SocketCan {
             rx: tokio::sync::Mutex::new(rx),
         })
     }
-    pub async fn send(&self, frame: &TNetworkFrame) {
-        if let Err(_) = self.sockets[frame.value.bus_id as usize]
+    pub async fn send(&self, frame: &TNetworkFrame) -> std::io::Result<()> {
+        self.sockets[frame.value.bus_id as usize]
             .0
             .transmit(&frame.value.can_frame)
-        {
-            eprintln!(
-                "Failed to transmit frame on socketcan interface {:?}",
-                self.sockets[frame.value.bus_id as usize].1,
-            );
-        };
     }
     pub async fn recv(&self) -> Option<TNetworkFrame> {
         self.rx.lock().await.recv().await

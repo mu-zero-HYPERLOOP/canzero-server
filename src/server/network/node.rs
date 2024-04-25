@@ -7,7 +7,7 @@ pub enum NetworkNode {
 }
 
 impl NetworkNode {
-    pub async fn send(&self, frame: &TNetworkFrame) {
+    pub async fn send(&self, frame: &TNetworkFrame) -> std::io::Result<()> {
         match &self {
             NetworkNode::SocketCanNode(socketcan) => socketcan.send(frame).await,
             NetworkNode::TcpCanNode(tcpcan) => tcpcan.send(frame).await,

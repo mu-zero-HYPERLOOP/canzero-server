@@ -27,15 +27,9 @@ impl TcpCan {
         }
     }
 
-    pub async fn send(&self, frame: &TNetworkFrame) {
+    pub async fn send(&self, frame: &TNetworkFrame) -> std::io::Result<()>{
         let bytes = bincode::serialize(frame).unwrap();
-        match self.tx_stream.lock().await.write_all(&bytes).await {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Failed to send on tcp stream, failed with {err:?}");
-            }
-        };
-
+        self.tx_stream.lock().await.write_all(&bytes).await
     }
 
     pub async fn recv(&self) -> Option<TNetworkFrame> {

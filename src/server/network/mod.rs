@@ -33,7 +33,9 @@ impl Network {
 
                 for (id, node) in nodes.read().await.iter() {
                     if *id != node_id { // ignore loop back!
-                        node.send(&frame).await;
+                        if let Err(err) = node.send(&frame).await {
+                            eprintln!("{err:?}");
+                        };
                     }
                 }
             }

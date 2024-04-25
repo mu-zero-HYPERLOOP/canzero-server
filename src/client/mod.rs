@@ -1,7 +1,4 @@
-use std::{
-    net::SocketAddr,
-    sync::Arc,
-};
+use std::{net::SocketAddr, sync::Arc};
 
 use can_config_rs::config;
 
@@ -42,7 +39,9 @@ pub async fn start_client_once(config: &config::NetworkRef) {
             let Some(frame) = socketcan.recv().await else {
                 break;
             };
-            tcpcan.send(&frame).await;
+            if let Err(err) = tcpcan.send(&frame).await {
+                eprintln!("{err:?}");
+            };
         }
     });
 
@@ -50,7 +49,9 @@ pub async fn start_client_once(config: &config::NetworkRef) {
         let Some(frame) = tcp_rx.recv().await else {
             break;
         };
-        socketcan_tx.send(&frame).await;
+        if let Err(err) = socketcan_tx.send(&frame).await {
+            eprintln!("{err:?}");
+        };
     }
     handle.abort();
     println!("\u{1b}[31mConnection closed\u{1b}[0m");
