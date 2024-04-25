@@ -2,7 +2,7 @@
 use clap::Parser;
 use server::start_server;
 
-use crate::{client::start_client, frame::TNetworkFrame};
+use crate::client::start_client;
 
 pub mod client;
 pub mod server;

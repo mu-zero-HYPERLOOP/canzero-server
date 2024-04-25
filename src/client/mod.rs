@@ -1,16 +1,9 @@
 use std::{
     net::SocketAddr,
-    sync::{atomic::AtomicBool, Arc},
-    time::Duration,
+    sync::Arc,
 };
 
-use can_config_rs::{
-    builder::bus::BusData,
-    config::{
-        self,
-        bus::{Bus, BusRef},
-    },
-};
+use can_config_rs::config;
 
 use crate::{socketcan::SocketCan, tcpcan::TcpCan};
 

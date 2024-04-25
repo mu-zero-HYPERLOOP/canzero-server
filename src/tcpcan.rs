@@ -1,9 +1,11 @@
-use std::{net::SocketAddr, ops::DerefMut};
+use std::{net::SocketAddr, ops::DerefMut, time::Duration};
 
 use futures::lock::Mutex;
 use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::tcp::{OwnedReadHalf, OwnedWriteHalf}};
 
-use crate::frame::TNetworkFrame;
+use crate::frame::{NetworkFrame, TNetworkFrame};
+
+use canzero_common::CanFrame;
 
 #[derive(Debug)]
 pub struct TcpCan {
@@ -13,13 +15,10 @@ pub struct TcpCan {
 
 impl TcpCan {
     pub fn new(tcp_stream: tokio::net::TcpStream) -> Self {
-        let frame_size = bincode::serialized_size(&TNetworkFrame{
-            network_frame : crate::frame::NetworkFrame {
-                bus_id : 0,
-                can_frame : can_socketcan_platform_rs::frame::CanFrame::new(0, false, false, 0, 0)
-            },
-            timestamp_us : 0,
-        }).unwrap();
+        let frame_size = bincode::serialized_size(&TNetworkFrame::new(Duration::from_secs(0), NetworkFrame{
+            bus_id : 0,
+            can_frame : CanFrame::new(0, false, false, 0, 0),
+        })).unwrap();
 
         let (rx, tx) = tcp_stream.into_split();
         Self {

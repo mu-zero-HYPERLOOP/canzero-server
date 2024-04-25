@@ -40,10 +40,7 @@ impl SocketCan {
                                 },
                                 Err(_) => todo!(),
                             };
-                            let tframe = TNetworkFrame{
-                                network_frame : frame,
-                                timestamp_us : Instant::now().duration_since(start_of_run).as_micros(),
-                            };
+                            let tframe = TNetworkFrame::now(start_of_run, frame);
 
                             if let Err(_) = tx.send(tframe).await {
                                 eprintln!("Failed to send on SocketCan interface {ifname:?}");
@@ -62,13 +59,13 @@ impl SocketCan {
         })
     }
     pub async fn send(&self, frame: &TNetworkFrame) {
-        if let Err(_) = self.sockets[frame.network_frame.bus_id as usize]
+        if let Err(_) = self.sockets[frame.value.bus_id as usize]
             .0
-            .transmit(&frame.network_frame.can_frame)
+            .transmit(&frame.value.can_frame)
         {
             eprintln!(
                 "Failed to transmit frame on socketcan interface {:?}",
-                self.sockets[frame.network_frame.bus_id as usize].1,
+                self.sockets[frame.value.bus_id as usize].1,
             );
         };
     }
