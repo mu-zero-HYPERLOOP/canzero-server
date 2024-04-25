@@ -1,7 +1,7 @@
 
 pub mod client;
 pub mod server;
-mod frame;
-mod socketcan;
-mod tcpcan;
+pub mod frame;
+pub mod socketcan;
+pub mod tcpcan;
 
