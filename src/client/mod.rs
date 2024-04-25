@@ -2,7 +2,8 @@ use std::{net::SocketAddr, sync::Arc};
 
 use can_config_rs::config;
 
-use crate::{socketcan::SocketCan, tcpcan::TcpCan};
+use crate::socketcan::SocketCan;
+use crate::tcpcan::TcpCan;
 
 use self::udp_discover::start_udp_discover;
 
