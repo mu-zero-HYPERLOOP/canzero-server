@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use can_config_rs::config;
 
 #[cfg(feature = "socket-can")]
@@ -33,7 +35,9 @@ pub async fn start_server(config: &config::NetworkRef) {
 
     println!("\u{1b}[33mBind TCP Welcome Socket at {tcp_welcome_port}\u{1b}[0m");
 
-    start_udp_reflector("CANzero", tcp_welcome_port, 9002)
+    let timebase = Instant::now();
+
+    start_udp_reflector("CANzero", tcp_welcome_port, 9002, timebase, &format!("{}@{}", whoami::devicename(), whoami::username()))
         .await
         .unwrap();
 

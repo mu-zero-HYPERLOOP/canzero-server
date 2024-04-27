@@ -1,6 +1,11 @@
-use std::{time::Duration, net::IpAddr};
+use std::time::Duration;
 
-pub async fn start_udp_discover(service_name: &str, broadcast_port: u16) -> std::io::Result<Vec<(IpAddr, u16)>> {
+use crate::frame::{HelloFrame, NetworkDescription, UdpDiscoverFrame};
+
+pub async fn start_udp_discover(
+    service_name: &str,
+    broadcast_port: u16,
+) -> std::io::Result<Vec<NetworkDescription>> {
     let socket = tokio::net::UdpSocket::bind(&format!("0.0.0.0:0"))
         .await
         .map_err(|_| {
@@ -14,27 +19,48 @@ pub async fn start_udp_discover(service_name: &str, broadcast_port: u16) -> std:
 
     let broadcast_addr = format!("255.255.255.255:{broadcast_port}");
 
-    let mut hello_msg = vec![0u8];
-    hello_msg.extend_from_slice(service_name.as_bytes());
+    let hello_frame = bincode::serialize(&UdpDiscoverFrame::Hello(HelloFrame {
+        service_name: service_name.to_owned(),
+    }))
+    .expect("Failed to serialize udp discovery HelloFrame");
     println!("\u{1b}[34mUDP-Discover: Sending hello packet\u{1b}[0m");
-    socket.send_to(&hello_msg, broadcast_addr).await?;
+    socket.send_to(&hello_frame, broadcast_addr).await?;
 
     let mut rx_buffer = [0u8; 1024];
     let mut connections = vec![];
     loop {
-        match tokio::time::timeout(Duration::from_millis(1000), socket.recv_from(&mut rx_buffer))
-            .await
+        match tokio::time::timeout(
+            Duration::from_millis(1000),
+            socket.recv_from(&mut rx_buffer),
+        )
+        .await
         {
-            Ok(Ok((packet_size, server_addr))) => {
-                let ty = rx_buffer[0];
-                let server_port = (rx_buffer[1] as u16) | ((rx_buffer[2] as u16) << 8);
-                let server_service_name = std::str::from_utf8(&rx_buffer[3..packet_size]).unwrap();
-                if ty == 1u8 && server_service_name == service_name {
-                    connections.push((server_addr.ip(), server_port));
+            Ok(Ok((packet_size, udp_server_addr))) => {
+                let Ok(frame) = bincode::deserialize::<UdpDiscoverFrame>(&rx_buffer[..packet_size])
+                else {
+                    println!("\u{1b}[34mUDP-Discover: Received ill formed frame [ignored]\u{1b}[0m");
+                    continue;
+                };
+                let UdpDiscoverFrame::NDF(ndf) = frame else {
+                    continue;
+                };
+                if ndf.service_name != service_name {
+                    println!(
+                        "\u{1b}[34mUDP-Discover: Received ndf for service {} [ignored]\u{1b}[0m",
+                        ndf.service_name
+                    );
+                    continue;
                 }
-                println!("\u{1b}[34mUDP-Discover: Discover server at {server_addr}\u{1b}[0m");
+                let nd = NetworkDescription {
+                    server_addr: udp_server_addr.ip(),
+                    server_name: ndf.server_name,
+                    service_port: ndf.service_port,
+                    time_since_sor: ndf.time_since_sor,
+                };
+                println!("\u{1b}[34mUDP-Discover: Discovered server named {} at {:?}:{:?}\u{1b}[0m", &nd.server_name, nd.server_addr, nd.service_port);
+                connections.push(nd);
                 break;
-            },
+            }
             Err(_) => {
                 println!("\u{1b}[34mUDP-Discover: Response timed out\u{1b}[0m");
                 break;

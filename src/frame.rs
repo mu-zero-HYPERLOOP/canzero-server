@@ -1,3 +1,5 @@
+use std::{net::IpAddr, time::Duration};
+
 use serde::{Deserialize, Serialize};
 
 use canzero_common::{CanFrame, Timestamped};
@@ -10,3 +12,31 @@ pub struct NetworkFrame {
 
 pub type TNetworkFrame = Timestamped<NetworkFrame>;
 
+
+
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum UdpDiscoverFrame {
+    Hello(HelloFrame),
+    NDF(NetworkDescriptionFrame)
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct HelloFrame {
+    pub service_name : String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NetworkDescriptionFrame {
+    pub service_name : String,
+    pub service_port : u16,
+    pub time_since_sor : Duration,
+    pub server_name: String,
+}
+
+pub struct NetworkDescription {
+    pub time_since_sor : Duration,
+    pub server_name: String,
+    pub service_port : u16,
+    pub server_addr : IpAddr,
+}
