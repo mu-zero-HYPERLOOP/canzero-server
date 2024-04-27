@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::frame::{HelloFrame, NetworkDescription, UdpDiscoverFrame};
 
@@ -36,6 +36,7 @@ pub async fn start_udp_discover(
         .await
         {
             Ok(Ok((packet_size, udp_server_addr))) => {
+                let local_timebase = Instant::now();
                 let Ok(frame) = bincode::deserialize::<UdpDiscoverFrame>(&rx_buffer[..packet_size])
                 else {
                     println!("\u{1b}[34mUDP-Discover: Received ill formed frame [ignored]\u{1b}[0m");
@@ -55,7 +56,7 @@ pub async fn start_udp_discover(
                     server_addr: udp_server_addr.ip(),
                     server_name: ndf.server_name,
                     service_port: ndf.service_port,
-                    time_since_sor: ndf.time_since_sor,
+                    timebase: local_timebase - ndf.time_since_sor,
                 };
                 println!("\u{1b}[34mUDP-Discover: Discovered server named {} at {:?}:{:?}\u{1b}[0m", &nd.server_name, nd.server_addr, nd.service_port);
                 connections.push(nd);

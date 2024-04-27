@@ -1,4 +1,4 @@
-use std::{net::IpAddr, time::Duration};
+use std::{net::IpAddr, time::{Duration, Instant}};
 
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +36,7 @@ pub struct NetworkDescriptionFrame {
 
 #[derive(Clone, Debug)]
 pub struct NetworkDescription {
-    pub time_since_sor : Duration,
+    pub timebase : Instant,
     pub server_name: String,
     pub service_port : u16,
     pub server_addr : IpAddr,
