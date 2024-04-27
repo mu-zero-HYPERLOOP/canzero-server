@@ -34,6 +34,7 @@ pub struct NetworkDescriptionFrame {
     pub server_name: String,
 }
 
+#[derive(Clone, Debug)]
 pub struct NetworkDescription {
     pub time_since_sor : Duration,
     pub server_name: String,
