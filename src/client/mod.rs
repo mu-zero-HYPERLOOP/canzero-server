@@ -2,12 +2,10 @@ use std::{net::SocketAddr, sync::Arc};
 
 use can_config_rs::config;
 
+use crate::discovery::udp_discover::start_udp_discover;
 use crate::socketcan::SocketCan;
 use crate::tcpcan::TcpCan;
 
-use self::udp_discover::start_udp_discover;
-
-pub mod udp_discover;
 
 pub async fn start_client(config: &config::NetworkRef) {
     loop {

@@ -4,15 +4,11 @@ use can_config_rs::config;
 
 #[cfg(feature = "socket-can")]
 use crate::socketcan::SocketCan;
-use crate::tcpcan::TcpCan;
+use crate::{discovery::udp_reflector::start_udp_reflector, tcpcan::TcpCan};
 
-use self::{
-    network::{node::NetworkNode, Network},
-    udp_reflector::start_udp_reflector,
-};
+use self::network::{node::NetworkNode, Network};
 
 pub mod network;
-pub mod udp_reflector;
 
 #[allow(unused_variables)]
 pub async fn start_server(config: &config::NetworkRef) {
