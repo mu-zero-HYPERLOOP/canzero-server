@@ -36,7 +36,7 @@ impl Network {
                 );
                 for frame in self.history.lock().await.iter() {
                     if let Err(_) = tcpcan.send(frame).await {
-                        println!("<red>Shutdown tcp connection {}</red>", tcpcan.addr().await);
+                        cprintln!("<red>Shutdown tcp connection {}</red>", tcpcan.addr().await);
                         return;
                     };
                 }
@@ -77,7 +77,7 @@ impl Network {
                     cprintln!("<red>Shutdown socketcan connection</red>")
                 }
                 NetworkNode::TcpCanNode(tcp) => {
-                    println!("<red>Shutdown tcp connection {}</red>", tcp.addr().await)
+                    cprintln!("<red>Shutdown tcp connection {}</red>", tcp.addr().await)
                 }
             };
         });
