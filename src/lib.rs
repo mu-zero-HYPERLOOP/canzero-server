@@ -29,7 +29,7 @@ impl Server {
         #[cfg(feature = "socket-can")]
         {
             network
-                .start(NetworkNode::SocketCanNode(SocketCan::connect().await?))
+                .start(NetworkNode::SocketCanNode(canzero_socketcan::socket_can::SocketCan::connect().await?))
                 .await
         }
 

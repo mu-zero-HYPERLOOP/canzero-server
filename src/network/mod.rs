@@ -1,7 +1,8 @@
 use std::sync::{atomic::AtomicU32, Arc};
 
+use canzero_common::TNetworkFrame;
 use color_print::cprintln;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 
 use self::node::NetworkNode;
 
@@ -9,6 +10,7 @@ pub mod node;
 
 pub struct Network {
     nodes: Arc<RwLock<Vec<(u32, Arc<NetworkNode>)>>>,
+    history : Arc<Mutex<Vec<TNetworkFrame>>>,
     id_acc: AtomicU32,
 }
 
@@ -17,6 +19,7 @@ impl Network {
         Self {
             nodes: Arc::new(RwLock::new(vec![])),
             id_acc: AtomicU32::new(0),
+            history : Arc::new(Mutex::new(vec![])),
         }
     }
 
@@ -24,13 +27,20 @@ impl Network {
         match &node {
             #[cfg(feature = "socket-can")]
             NetworkNode::SocketCanNode(_) => {
-                cprintln!("<green>Establish socketcan connection</green>")
+                cprintln!("<green>Establish socketcan connection</green>");
             }
             NetworkNode::TcpCanNode(tcpcan) => {
                 cprintln!(
                     "<green>Establish tcp connection {}</green>",
                     tcpcan.addr().await
-                )
+                );
+                for frame in self.history.lock().await.iter() {
+                    if let Err(_) = tcpcan.send(frame).await {
+                        println!("<red>Shutdown tcp connection {}</red>", tcpcan.addr().await);
+                        return;
+                    };
+                }
+                
             }
         }
         let nodes = self.nodes.clone();
@@ -39,12 +49,12 @@ impl Network {
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let node = Arc::new(node);
         nodes.write().await.push((node_id, node.clone()));
+        let history = self.history.clone();
         tokio::spawn(async move {
             loop {
                 let Some(frame) = node.recv().await else {
                     break;
                 };
-
                 for (id, node) in nodes.read().await.iter() {
                     if *id != node_id {
                         // ignore loop back!
@@ -53,6 +63,7 @@ impl Network {
                         };
                     }
                 }
+                history.lock().await.push(frame);
             }
             // remove node
             let mut nodes_lock = nodes.write().await;

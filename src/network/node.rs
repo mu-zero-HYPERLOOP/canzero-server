@@ -4,7 +4,7 @@ use canzero_tcp::tcpcan::TcpCan;
 #[derive(Debug)]
 pub enum NetworkNode {
     #[cfg(feature = "socket-can")]
-    SocketCanNode(SocketCan),
+    SocketCanNode(canzero_socketcan::socket_can::SocketCan),
     TcpCanNode(TcpCan),
 }
 
