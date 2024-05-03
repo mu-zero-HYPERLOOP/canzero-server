@@ -1,15 +1,18 @@
 [package]
-name = "can-tcp-bridge-rs"
+name = "canzero-server"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-can-socketcan-platform-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-socketcan-platform-rs.git", optional = true}
-can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
-can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
+canzero-socketcan = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-socketcan.git", optional = true}
+canzero-tcp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git" }
+canzero-udp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-udp.git" }
+canzero-config = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-config.git" }
+# this dependency should probably not be here and it should be handled by canzero-appdata
 canzero-common = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-common.git" }
+canzero-appdata = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git" }
 crossbeam = "0.8.4"
 log = "0.4.20"
 clap = {version= "4.0.0", features = ["derive"]}
@@ -18,7 +21,8 @@ futures = "0.3.30"
 serde = { version = "1.0.197", features = ["derive", "serde_derive"] }
 bincode = { version = "1.3.3", features = ["i128"] }
 whoami = "1.5.1"
+color-print = "0.3.6"
 
 [features]
 default = []
-socket-can = ["dep:can-socketcan-platform-rs"]
+socket-can = ["dep:canzero-socketcan"]

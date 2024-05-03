@@ -1,5 +1,6 @@
 use std::sync::{atomic::AtomicU32, Arc};
 
+use color_print::cprintln;
 use tokio::sync::RwLock;
 
 use self::node::NetworkNode;
@@ -20,6 +21,18 @@ impl Network {
     }
 
     pub async fn start(&self, node: NetworkNode) {
+        match &node {
+            #[cfg(feature = "socket-can")]
+            NetworkNode::SocketCanNode(_) => {
+                cprintln!("<green>Establish socketcan connection</green>")
+            }
+            NetworkNode::TcpCanNode(tcpcan) => {
+                cprintln!(
+                    "<green>Establish tcp connection {}</green>",
+                    tcpcan.addr().await
+                )
+            }
+        }
         let nodes = self.nodes.clone();
         let node_id = self
             .id_acc
@@ -50,10 +63,10 @@ impl Network {
             match node.as_ref() {
                 #[cfg(feature = "socket-can")]
                 NetworkNode::SocketCanNode(_) => {
-                    println!("\u{1b}[31mShutdown socketcan connection\u{1b}[0m")
+                    cprintln!("<red>Shutdown socketcan connection</red>")
                 }
                 NetworkNode::TcpCanNode(tcp) => {
-                    println!("\u{1b}[31mShutdown {}\u{1b}[0m", tcp.addr().await)
+                    println!("<red>Shutdown tcp connection {}</red>", tcp.addr().await)
                 }
             };
         });

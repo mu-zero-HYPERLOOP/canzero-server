@@ -1,7 +1,5 @@
-#[cfg(feature = "socket-can")]
-use crate::socketcan::SocketCan;
-
-use crate::{frame::TNetworkFrame, tcpcan::TcpCan};
+use canzero_common::TNetworkFrame;
+use canzero_tcp::tcpcan::TcpCan;
 
 #[derive(Debug)]
 pub enum NetworkNode {
