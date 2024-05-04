@@ -92,9 +92,9 @@ dependencies = [
 
 [[package]]
 name = "autocfg"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
+checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 
 [[package]]
 name = "backtrace"
@@ -148,6 +148,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "build-time"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1219c19fc29b7bfd74b7968b420aff5bc951cf517800176e795d6b2300dd382"
+dependencies = [
+ "chrono",
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.60",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -172,7 +185,7 @@ dependencies = [
 [[package]]
 name = "canzero-appdata"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git#379ac275618086a312aa667962adbc02dc5bffad"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git#15e8dace76f269dcd6932271d6e80e3c4b4f9778"
 dependencies = [
  "canzero-config",
  "canzero-yaml",
@@ -192,7 +205,7 @@ dependencies = [
 [[package]]
 name = "canzero-config"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-config.git#201a610077faef459451d4206703b2669343d345"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-config.git#c0a3785bee212cb8d22a7eaafa8282f17c7241ae"
 dependencies = [
  "bit_reverse",
  "can-dbc",
@@ -249,9 +262,12 @@ dependencies = [
 [[package]]
 name = "canzero-udp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#1a0031fe85956bf66fce6782c71ae3f2e79827ae"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#fafa1764d8e15248e0a99ce0689d1fe7cd7b133a"
 dependencies = [
  "bincode",
+ "build-time",
+ "canzero-config",
+ "chrono",
  "color-print",
  "serde",
  "tokio",
@@ -838,9 +854,9 @@ dependencies = [
 
 [[package]]
 name = "num-traits"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da0df0e5185db44f69b44f26786fe401b6c293d1907744beaa7fa62b2e5a517a"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
 ]

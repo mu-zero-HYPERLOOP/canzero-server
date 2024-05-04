@@ -3,6 +3,7 @@ use std::{
     time::Instant,
 };
 
+use canzero_config::config::NetworkRef;
 use canzero_tcp::tcpcan::TcpCan;
 use canzero_udp::beacon::UdpNetworkBeacon;
 use color_print::cprintln;
@@ -18,10 +19,11 @@ pub struct Server {
     welcome: Arc<TcpListener>,
     tcp_service_port: u16,
     task_handle: Arc<Mutex<Option<AbortHandle>>>,
+    config : NetworkRef,
 }
 
 impl Server {
-    pub async fn create() -> std::io::Result<Self> {
+    pub async fn create(config : NetworkRef) -> std::io::Result<Self> {
         let timebase = Instant::now();
 
         let network = Network::new();
@@ -43,6 +45,7 @@ impl Server {
             welcome: Arc::new(tcp_listener),
             tcp_service_port,
             task_handle: Arc::new(Mutex::new(None)),
+            config,
         })
     }
 
@@ -59,6 +62,7 @@ impl Server {
                     self.timebase,
                     self.welcome.clone(),
                     self.tcp_service_port,
+                    self.config.clone(),
                 ))
                 .abort_handle(),
             );
@@ -83,15 +87,17 @@ impl Server {
         timebase: Instant,
         welcome: Arc<TcpListener>,
         tcp_service_port: u16,
+        config : NetworkRef
     ) {
         async fn pserver_task(
             network: &Network,
             timebase: Instant,
             welcome: &TcpListener,
             tcp_service_port: u16,
+            config : NetworkRef,
         ) -> std::io::Result<()> {
             let server_name = format!("{}@{}", whoami::devicename(), whoami::username());
-            let beacon = UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name).await?;
+            let beacon = UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name, config).await?;
             beacon.start();
             cprintln!("<green>Successfully started UDP Beacon</green>");
 
@@ -104,7 +110,7 @@ impl Server {
             }
         }
         loop {
-            let Err(err) = pserver_task(&network, timebase, &welcome, tcp_service_port).await
+            let Err(err) = pserver_task(&network, timebase, &welcome, tcp_service_port, config.clone()).await
             else {
                 continue;
             };
