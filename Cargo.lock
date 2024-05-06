@@ -197,7 +197,7 @@ dependencies = [
 [[package]]
 name = "canzero-common"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-common.git#870bdc209c46d4f7348cf50d10e87623c1de2cf3"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-common.git#7b7079fec6ef3744de4eda62901ecd4b27f35289"
 dependencies = [
  "serde",
 ]
@@ -205,12 +205,13 @@ dependencies = [
 [[package]]
 name = "canzero-config"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-config.git#c0a3785bee212cb8d22a7eaafa8282f17c7241ae"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-config.git#6d4db07da6bfae656f736466f1497f121e9a2a02"
 dependencies = [
  "bit_reverse",
  "can-dbc",
  "chrono",
  "regex",
+ "seahash",
 ]
 
 [[package]]
@@ -251,10 +252,11 @@ dependencies = [
 [[package]]
 name = "canzero-tcp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git#a55712f40ae26e3c296b49441ace021f70e1e06c"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git#45c6e3db316008e18281d19e203954720d43da25"
 dependencies = [
  "bincode",
  "canzero-common",
+ "color-print",
  "serde",
  "tokio",
 ]
@@ -262,7 +264,7 @@ dependencies = [
 [[package]]
 name = "canzero-udp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#fafa1764d8e15248e0a99ce0689d1fe7cd7b133a"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#af6dac88d4a455f4440fe03e552a9ed9392c5f1e"
 dependencies = [
  "bincode",
  "build-time",
@@ -285,9 +287,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.96"
+version = "1.0.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "065a29261d53ba54260972629f9ca6bffa69bac13cd1fed61420f7fa68b9f8bd"
+checksum = "099a5357d84c4c61eb35fc8eafa9a79a902c2f76911e5747ced4e032edd8d9b4"
 
 [[package]]
 name = "cfg-if"
@@ -606,9 +608,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.14"
+version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94b22e06ecb0110981051723910cbf0b5f5e09a2062dd7663334ee79a9d1286c"
+checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
  "libc",
@@ -1071,6 +1073,12 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "seahash"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c107b6f4780854c8b126e228ea8869f4d7b71260f962fefb57b996b8959ba6b"
 
 [[package]]
 name = "serde"
@@ -1536,9 +1544,9 @@ checksum = "bec47e5bfd1bff0eeaf6d8b485cc1074891a197ab4225d504cb7a1ab88b02bf0"
 
 [[package]]
 name = "winnow"
-version = "0.6.7"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14b9415ee827af173ebb3f15f9083df5a122eb93572ec28741fb153356ea2578"
+checksum = "c3c52e9c97a68071b23e836c9380edae937f17b9c4667bd021973efc689f618d"
 dependencies = [
  "memchr",
 ]

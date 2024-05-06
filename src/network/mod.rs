@@ -10,7 +10,7 @@ pub mod node;
 
 pub struct Network {
     nodes: Arc<RwLock<Vec<(u32, Arc<NetworkNode>)>>>,
-    history : Arc<Mutex<Vec<TNetworkFrame>>>,
+    history: Arc<Mutex<Vec<TNetworkFrame>>>,
     id_acc: AtomicU32,
 }
 
@@ -19,7 +19,7 @@ impl Network {
         Self {
             nodes: Arc::new(RwLock::new(vec![])),
             id_acc: AtomicU32::new(0),
-            history : Arc::new(Mutex::new(vec![])),
+            history: Arc::new(Mutex::new(vec![])),
         }
     }
 
@@ -30,17 +30,20 @@ impl Network {
                 cprintln!("<green>Establish socketcan connection</green>");
             }
             NetworkNode::TcpCanNode(tcpcan) => {
-                cprintln!(
-                    "<green>Establish tcp connection {}</green>",
-                    tcpcan.addr().await
-                );
+                let addr = match tcpcan.addr().await {
+                    Ok(addr) => addr,
+                    Err(_) => {
+                        cprintln!("<red>Can't resolve connection addr [rejected connection]</red>");
+                        return;
+                    }
+                };
+                cprintln!("<green>Establish tcp connection {}</green>", addr);
                 for frame in self.history.lock().await.iter() {
                     if let Err(_) = tcpcan.send(frame).await {
-                        cprintln!("<red>Shutdown tcp connection {}</red>", tcpcan.addr().await);
+                        cprintln!("<red>Shutdown tcp connection {}</red>", addr);
                         return;
                     };
                 }
-                
             }
         }
         let nodes = self.nodes.clone();
@@ -77,7 +80,16 @@ impl Network {
                     cprintln!("<red>Shutdown socketcan connection</red>")
                 }
                 NetworkNode::TcpCanNode(tcp) => {
-                    cprintln!("<red>Shutdown tcp connection {}</red>", tcp.addr().await)
+                    let addr = match tcp.addr().await {
+                        Ok(addr) => addr,
+                        Err(_) => {
+                            cprintln!(
+                                "???"
+                            );
+                            return;
+                        }
+                    };
+                    cprintln!("<red>Shutdown tcp connection {}</red>", addr)
                 }
             };
         });
